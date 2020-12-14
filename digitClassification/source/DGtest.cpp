@@ -5,14 +5,30 @@
 using namespace cv;
 using namespace std;
 
-
-#define ERROR_CHECK_OBJECT(obj) { vx_status status = vxGetStatus((vx_reference)(obj)); if(status != VX_SUCCESS) { vxAddLogEntry((vx_reference)context, status     , "ERROR: failed with status = (%d) at " __FILE__ "#%d\n", status, __LINE__); return status; } }
-#define ERROR_CHECK_STATUS(call) { vx_status status = (call); if(status != VX_SUCCESS) { printf("ERROR: failed with status = (%d) at " __FILE__ "#%d\n", status, __LINE__); exit(-1); } }
+#define ERROR_CHECK_OBJECT(obj)                                                                                                      \
+    {                                                                                                                                \
+        vx_status status = vxGetStatus((vx_reference)(obj));                                                                         \
+        if (status != VX_SUCCESS)                                                                                                    \
+        {                                                                                                                            \
+            vxAddLogEntry((vx_reference)context, status, "ERROR: failed with status = (%d) at " __FILE__ "#%d\n", status, __LINE__); \
+            return status;                                                                                                           \
+        }                                                                                                                            \
+    }
+#define ERROR_CHECK_STATUS(call)                                                               \
+    {                                                                                          \
+        vx_status status = (call);                                                             \
+        if (status != VX_SUCCESS)                                                              \
+        {                                                                                      \
+            printf("ERROR: failed with status = (%d) at " __FILE__ "#%d\n", status, __LINE__); \
+            exit(-1);                                                                          \
+        }                                                                                      \
+    }
 
 static void VX_CALLBACK log_callback(vx_context context, vx_reference ref, vx_status status, const vx_char string[])
 {
     size_t len = strlen(string);
-    if (len > 0) {
+    if (len > 0)
+    {
         printf("%s", string);
         if (string[len - 1] != '\n')
             printf("\n");
@@ -20,13 +36,15 @@ static void VX_CALLBACK log_callback(vx_context context, vx_reference ref, vx_st
     }
 }
 
-DGtest::DGtest(const char* model_url) {
+DGtest::DGtest(const char *model_url)
+{
 
     // create context
     mContext = vxCreateContext();
     vx_status status;
     status = vxGetStatus((vx_reference)mContext);
-    if(status) {
+    if (status)
+    {
         printf("ERROR: vxCreateContext() failed\n");
         exit(-1);
     }
@@ -35,23 +53,26 @@ DGtest::DGtest(const char* model_url) {
     // create graph
     mGraph = vxCreateGraph(mContext);
     status = vxGetStatus((vx_reference)mGraph);
-    if(status) {
+    if (status)
+    {
         printf("ERROR: vxCreateGraph(...) failed (%d)\n", status);
         exit(-1);
     }
 
     // create and initialize input tensor data
-    vx_size input_dims[4] = { 28, 28, 1, 1 };
+    vx_size input_dims[4] = {28, 28, 1, 1};
     mInputTensor = vxCreateTensor(mContext, 4, input_dims, VX_TYPE_FLOAT32, 0);
-    if(vxGetStatus((vx_reference)mInputTensor)) {
+    if (vxGetStatus((vx_reference)mInputTensor))
+    {
         printf("ERROR: vxCreateTensor() failed\n");
         exit(-1);
     }
-    
+
     // create and initialize output tensor data
-    vx_size output_dims[4] = { 1, 1, 10, 1 };
+    vx_size output_dims[4] = {1, 1, 10, 1};
     mOutputTensor = vxCreateTensor(mContext, 4, output_dims, VX_TYPE_FLOAT32, 0);
-    if(vxGetStatus((vx_reference)mOutputTensor)) {
+    if (vxGetStatus((vx_reference)mOutputTensor))
+    {
         printf("ERROR: vxCreateTensor() failed for mOutputTensor\n");
         exit(-1);
     }
@@ -60,22 +81,82 @@ DGtest::DGtest(const char* model_url) {
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
     mNN_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
-    if(vxGetStatus((vx_reference)mNN_kernel)) {
+    if (vxGetStatus((vx_reference)mNN_kernel))
+    {
         printf("ERROR: vxImportKernelFromURL() failed for NN_kernel\n");
         exit(-1);
     }
 
     mNode = vxCreateGenericNode(mGraph, mNN_kernel);
-    
+    if (vxGetStatus((vx_reference)mNode))
+    {
+        printf("ERROR: vxCreateGenericNode() failed for mNode\n");
+        exit(-1);
+    }
+
+    status = vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, mNum_params, sizeof(vx_uint32));
+    if (status)
+    {
+        printf("ERROR: vxQueryKernel(...) failed (%d)\n", status);
+        exit(-1);
+    }
+
+    // query parameters of kernel to create tensor objects and add to node
+    for (vx_uint32 i = 0; i < num_params; i++)
+    {
+        if ((i != 0) || (i != (num_params - 1)))
+        {
+            vx_type_e type;
+            vx_parameter prm = vxGetKernelParameterByIndex(nn_kernel, i);
+            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_TYPE, &type, sizeof(vx_type_e)));
+
+            if (VX_TYPE_TENSOR == type)
+            {
+                vx_meta_format meta;
+                vx_size num_dims;
+                vx_size sizes[MAX_SIZES];
+                vx_enum tensor_type;
+                vx_int8 fixed_point_precision;
+
+                ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_META_FORMAT, &meta,
+                                                    sizeof(vx_meta_format)));
+
+                // Query data needed to create tensor
+                vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS,
+                                           &num_dims, sizeof(vx_size));
+                vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS,
+                                           &sizes, sizeof(sizes));
+                vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE,
+                                           &tensor_type, sizeof(vx_enum));
+                vxQueryMetaFormatAttribute(meta, VX_TENSOR_FIXED_POINT_PRECISION,
+                                           &fixed_point_precision, sizeof(vx_int8));
+
+                tensors[i] = vxCreateTensor(context, num_dims, sizes, tensor_type,
+                                            fixed_point_precision);
+            }
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, tensors[i]));
+        }
+        else if (i == 0)
+        {
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mInputTensor));
+        }
+        else if (i == (num_params - 1))
+        {
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mOutputTensor));
+        }
+    }
+
     //verify the graph
     status = vxVerifyGraph(mGraph);
-    if(status) {
+    if (status)
+    {
         printf("ERROR: vxVerifyGraph(...) failed (%d)\n", status);
         exit(-1);
-    } 
+    }
 };
 
-DGtest::~DGtest(){
+DGtest::~DGtest()
+{
     //release the tensors
     ERROR_CHECK_STATUS(vxReleaseTensor(&mInputTensor));
     ERROR_CHECK_STATUS(vxReleaseTensor(&mOutputTensor));
@@ -85,80 +166,95 @@ DGtest::~DGtest(){
     ERROR_CHECK_STATUS(vxReleaseKernel(&mNN_kernel));
     //release the graph
     ERROR_CHECK_STATUS(vxReleaseGraph(&mGraph));
+    // release internal tensors
+    for (vx_uint32 i = 0; i < num_params; i++)
+    {
+        if ((i != 0) || (i != (num_params - 1)))
+            ERROR_CHECK_STATUS(vxReleaseTensor(&tensors[i]));
+    }
     // release context
     ERROR_CHECK_STATUS(vxReleaseContext(&mContext));
 };
 
-int DGtest::runInference(Mat &image) {
-    
+int DGtest::runInference(Mat &image)
+{
+
     Mat img = image.clone();
-    
+
     // convert to grayscale image
     cvtColor(img, img, CV_BGR2GRAY);
 
-    // resize to 24 x 24 
-	resize(img, img, Size(24, 24));
-    
-    // dilate image
-	dilate(img, img, Mat::ones(2,2,CV_8U)); 
-    
-    // add border to the image so that the digit will go center and become 28 x 28 image
-    copyMakeBorder(img, img, 2, 2, 2, 2, BORDER_CONSTANT, Scalar(0,0,0));
+    // resize to 24 x 24
+    resize(img, img, Size(24, 24));
 
-    vx_size dims[4] = { 1, 1, 1, 1 }, stride[4];
+    // dilate image
+    dilate(img, img, Mat::ones(2, 2, CV_8U));
+
+    // add border to the image so that the digit will go center and become 28 x 28 image
+    copyMakeBorder(img, img, 2, 2, 2, 2, BORDER_CONSTANT, Scalar(0, 0, 0));
+
+    vx_size dims[4] = {1, 1, 1, 1}, stride[4];
     vx_status status;
     vx_map_id map_id;
-    float * ptr;
+    float *ptr;
 
-    // query tensor for the dimension    
-    vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0])*4);
- 
+    // query tensor for the dimension
+    vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4);
+
     // copy image to input tensor
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
-    if(status) {
-        std::cerr << "ERROR: vxMapTensorPatch() failed for " <<  std::endl;
+    if (status)
+    {
+        std::cerr << "ERROR: vxMapTensorPatch() failed for " << std::endl;
         return -1;
     }
-    
-    for(vx_size y = 0; y < dims[1]; y++) {
-        unsigned char * src = img.data + y*dims[0]*dims[2];
-        float * dst = ptr + ((y * stride[1]) >> 2);
-        for(vx_size x = 0; x < dims[0]; x++, src++) {
+
+    for (vx_size y = 0; y < dims[1]; y++)
+    {
+        unsigned char *src = img.data + y * dims[0] * dims[2];
+        float *dst = ptr + ((y * stride[1]) >> 2);
+        for (vx_size x = 0; x < dims[0]; x++, src++)
+        {
             *dst++ = src[0];
         }
     }
 
     status = vxUnmapTensorPatch(mInputTensor, map_id);
-    if(status) {
-        std::cerr << "ERROR: vxUnmapTensorPatch() failed for " <<  std::endl;
+    if (status)
+    {
+        std::cerr << "ERROR: vxUnmapTensorPatch() failed for " << std::endl;
         return -1;
     }
 
     //process the graph
     status = vxProcessGraph(mGraph);
-    if(status != VX_SUCCESS) {
-        std::cerr << "ERROR: vxProcessGraph() failed" <<  std::endl;
+    if (status != VX_SUCCESS)
+    {
+        std::cerr << "ERROR: vxProcessGraph() failed" << std::endl;
         return -1;
     }
 
     // get the output result from output tensor
     status = vxMapTensorPatch(mOutputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST);
-    if(status) {
-        std::cerr << "ERROR: vxMapTensorPatch() failed for "  << std::endl;
+    if (status)
+    {
+        std::cerr << "ERROR: vxMapTensorPatch() failed for " << std::endl;
         return -1;
     }
 
     mDigit = std::distance(ptr, std::max_element(ptr, ptr + 10));
 
     status = vxUnmapTensorPatch(mOutputTensor, map_id);
-    if(status) {
-        std::cerr << "ERROR: vxUnmapTensorPatch() failed for "  << std::endl;
+    if (status)
+    {
+        std::cerr << "ERROR: vxUnmapTensorPatch() failed for " << std::endl;
         return -1;
     }
 
     return 0;
 }
 
-int DGtest::getResult() {
+int DGtest::getResult()
+{
     return mDigit;
 }

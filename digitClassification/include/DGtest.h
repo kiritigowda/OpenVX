@@ -1,5 +1,8 @@
 #pragma once
+
 #include <VX/vx_khr_import_kernel.h>
+
+#define MAX_TENSORS 50
 
 /**
  *  Class to run the inference
@@ -62,6 +65,10 @@ private:
     /**
      *  Kernel will be used for the inference
      */
-    vx_kernel mNN_kernel; 
+    vx_kernel mNN_kernel;
+
+    // variables
+    vx_uint32 mNum_params, i;
+    vx_tensor mTensors[MAX_TENSORS] = { NULL };
 
 };

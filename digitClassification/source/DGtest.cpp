@@ -128,11 +128,9 @@ DGtest::DGtest(const char *model_url)
                                            &n_size, sizeof(n_size));
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE,
                                            &tensor_type, sizeof(vx_enum));
-                vxQueryMetaFormatAttribute(meta, VX_TENSOR_FIXED_POINT_PRECISION,
-                                           &fixed_point_precision, sizeof(vx_int8));
 
-                mTensors[i] = vxCreateTensor(context, num_dims, n_size, tensor_type,
-                                            fixed_point_precision);
+                mTensors[i] = vxCreateTensor(mContext, num_dims, n_size, tensor_type,
+                                            VX_TYPE_FLOAT32);
             }
             ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mTensors[i]));
         }

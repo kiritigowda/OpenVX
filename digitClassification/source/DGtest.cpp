@@ -134,15 +134,15 @@ DGtest::DGtest(const char *model_url)
                 mTensors[i] = vxCreateTensor(context, num_dims, sizes, tensor_type,
                                             fixed_point_precision);
             }
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mTensors[i]));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mTensors[i]));
         }
         else if (i == 0)
         {
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mInputTensor));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mInputTensor));
         }
         else if (i == (mNum_params - 1))
         {
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mOutputTensor));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mOutputTensor));
         }
     }
 

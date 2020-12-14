@@ -94,7 +94,7 @@ DGtest::DGtest(const char *model_url)
         exit(-1);
     }
 
-    status = vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, mNum_params, sizeof(vx_uint32));
+    status = vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, &mNum_params, sizeof(vx_uint32));
     if (status)
     {
         printf("ERROR: vxQueryKernel(...) failed (%d)\n", status);
@@ -107,14 +107,14 @@ DGtest::DGtest(const char *model_url)
         if ((i != 0) || (i != (mNum_params - 1)))
         {
             vx_type_e type;
-            vx_parameter prm = vxGetKernelParameterByIndex(nn_kernel, i);
+            vx_parameter prm = vxGetKernelParameterByIndex(mNN_kernel, i);
             ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_TYPE, &type, sizeof(vx_type_e)));
 
             if (VX_TYPE_TENSOR == type)
             {
                 vx_meta_format meta;
                 vx_size num_dims;
-                vx_size sizes[MAX_SIZES];
+                vx_size n_size[50];
                 vx_enum tensor_type;
                 vx_int8 fixed_point_precision;
 
@@ -125,24 +125,24 @@ DGtest::DGtest(const char *model_url)
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS,
                                            &num_dims, sizeof(vx_size));
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS,
-                                           &sizes, sizeof(sizes));
+                                           &n_size, sizeof(n_size));
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE,
                                            &tensor_type, sizeof(vx_enum));
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_FIXED_POINT_PRECISION,
                                            &fixed_point_precision, sizeof(vx_int8));
 
-                mTensors[i] = vxCreateTensor(context, num_dims, sizes, tensor_type,
+                mTensors[i] = vxCreateTensor(context, num_dims, n_size, tensor_type,
                                             fixed_point_precision);
             }
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mTensors[i]));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mTensors[i]));
         }
         else if (i == 0)
         {
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mInputTensor));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mInputTensor));
         }
         else if (i == (mNum_params - 1))
         {
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, mOutputTensor));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mOutputTensor));
         }
     }
 

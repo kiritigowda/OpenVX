@@ -59,14 +59,13 @@ DGtest::DGtest(const char* model_url) {
     //Get nnef kernel
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
-    vx_kernel nn_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
+    mNN_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
     if(vxGetStatus((vx_reference)nn_kernel)) {
         printf("ERROR: vxImportKernelFromURL() failed for nn_kernel\n");
         exit(-1);
     }
 
-    vx_node node = vxCreateGenericNode(mGraph, nn_kernel);
-    vxReleaseNode(&node);
+    mNode = vxCreateGenericNode(mGraph, mNN_kernel);
     
     //verify the graph
     status = vxVerifyGraph(mGraph);
@@ -80,6 +79,10 @@ DGtest::~DGtest(){
     //release the tensors
     ERROR_CHECK_STATUS(vxReleaseTensor(&mInputTensor));
     ERROR_CHECK_STATUS(vxReleaseTensor(&mOutputTensor));
+    //release node
+    ERROR_CHECK_STATUS(vxReleaseNode(&mNode));
+    //release Kernel
+    ERROR_CHECK_STATUS(vxReleaseKernel(&mNN_kernel));
     //release the graph
     ERROR_CHECK_STATUS(vxReleaseGraph(&mGraph));
     // release context

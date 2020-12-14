@@ -102,9 +102,9 @@ DGtest::DGtest(const char *model_url)
     }
 
     // query parameters of kernel to create tensor objects and add to node
-    for (vx_uint32 i = 0; i < num_params; i++)
+    for (vx_uint32 i = 0; i < mNum_params; i++)
     {
-        if ((i != 0) || (i != (num_params - 1)))
+        if ((i != 0) || (i != (mNum_params - 1)))
         {
             vx_type_e type;
             vx_parameter prm = vxGetKernelParameterByIndex(nn_kernel, i);
@@ -131,16 +131,16 @@ DGtest::DGtest(const char *model_url)
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_FIXED_POINT_PRECISION,
                                            &fixed_point_precision, sizeof(vx_int8));
 
-                tensors[i] = vxCreateTensor(context, num_dims, sizes, tensor_type,
+                mTensors[i] = vxCreateTensor(context, num_dims, sizes, tensor_type,
                                             fixed_point_precision);
             }
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, tensors[i]));
+            ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mTensors[i]));
         }
         else if (i == 0)
         {
             ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mInputTensor));
         }
-        else if (i == (num_params - 1))
+        else if (i == (mNum_params - 1))
         {
             ERROR_CHECK_STATUS(vxSetParameterByIndex(node, i, mOutputTensor));
         }
@@ -167,10 +167,10 @@ DGtest::~DGtest()
     //release the graph
     ERROR_CHECK_STATUS(vxReleaseGraph(&mGraph));
     // release internal tensors
-    for (vx_uint32 i = 0; i < num_params; i++)
+    for (vx_uint32 i = 0; i < mNum_params; i++)
     {
-        if ((i != 0) || (i != (num_params - 1)))
-            ERROR_CHECK_STATUS(vxReleaseTensor(&tensors[i]));
+        if ((i != 0) || (i != (mNum_params - 1)))
+            ERROR_CHECK_STATUS(vxReleaseTensor(&mTensors[i]));
     }
     // release context
     ERROR_CHECK_STATUS(vxReleaseContext(&mContext));

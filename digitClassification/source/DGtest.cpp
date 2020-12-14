@@ -129,8 +129,7 @@ DGtest::DGtest(const char *model_url)
                 vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE,
                                            &tensor_type, sizeof(vx_enum));
 
-                mTensors[i] = vxCreateTensor(mContext, num_dims, n_size, tensor_type,
-                                            VX_TYPE_FLOAT32);
+                mTensors[i] = vxCreateTensor(mContext, num_dims, n_size, VX_TYPE_FLOAT32, 0);
             }
             ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mTensors[i]));
         }
@@ -203,7 +202,7 @@ int DGtest::runInference(Mat &image)
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
     if (status)
     {
-        std::cerr << "ERROR: vxMapTensorPatch() failed for " << std::endl;
+        std::cerr << "ERROR: vxMapTensorPatch() failed for mInputTensor" << std::endl;
         return -1;
     }
 
@@ -220,7 +219,7 @@ int DGtest::runInference(Mat &image)
     status = vxUnmapTensorPatch(mInputTensor, map_id);
     if (status)
     {
-        std::cerr << "ERROR: vxUnmapTensorPatch() failed for " << std::endl;
+        std::cerr << "ERROR: vxUnmapTensorPatch() failed for mInputTensor" << std::endl;
         return -1;
     }
 
@@ -236,7 +235,7 @@ int DGtest::runInference(Mat &image)
     status = vxMapTensorPatch(mOutputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST);
     if (status)
     {
-        std::cerr << "ERROR: vxMapTensorPatch() failed for " << std::endl;
+        std::cerr << "ERROR: vxMapTensorPatch() failed for mOutputTensor" << std::endl;
         return -1;
     }
 
@@ -245,7 +244,7 @@ int DGtest::runInference(Mat &image)
     status = vxUnmapTensorPatch(mOutputTensor, map_id);
     if (status)
     {
-        std::cerr << "ERROR: vxUnmapTensorPatch() failed for " << std::endl;
+        std::cerr << "ERROR: vxUnmapTensorPatch() failed for mOutputTensor" << std::endl;
         return -1;
     }
 

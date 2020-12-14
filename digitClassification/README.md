@@ -52,6 +52,6 @@ make
 * **Step - 5:** Run Digit Classification application
 
 ``` 
- ./DGtest ../openvx/digitClassification/mnist-nnef
- ```
+./DGtest ../openvx/digitClassification/mnist-nnef
+```
  

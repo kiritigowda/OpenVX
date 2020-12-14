@@ -7,3 +7,6 @@
 <a href="https://www.khronos.org/openvx/" target="_blank">Khronos OpenVX™</a> is an open, royalty-free standard for cross-platform acceleration of computer vision applications. OpenVX enables performance and power-optimized computer vision processing, especially important in embedded and real-time use cases such as face, body, and gesture tracking, smart video surveillance, advanced driver assistance systems (ADAS), object and scene reconstruction, augmented reality, visual inspection, robotics and more.
 
 This repository has developer help, tools, and examples to make development with OpenVX simple.
+
+# Digit Classification
+[Digit Classification](digitClassification) is a tutorial program for those who are new to OpenVX. It runs inference on handwritten digits with the [MNIST](http://yann.lecun.com/exdb/mnist/) NNEF model using OpenVX NNEF Import Kernel.

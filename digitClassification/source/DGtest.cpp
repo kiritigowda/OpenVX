@@ -106,7 +106,7 @@ DGtest::DGtest(const char *model_url)
     // query parameters of kernel to create tensor objects and add to node
     for (vx_uint32 i = 0; i < mNum_params; i++)
     {
-        if ((i != 0) || (i != (mNum_params - 1)))
+        /*if ((i != 0) || (i != (mNum_params - 1)))
         {
             vx_type_e type;
             vx_parameter prm = vxGetKernelParameterByIndex(mNN_kernel, i);
@@ -136,12 +136,15 @@ DGtest::DGtest(const char *model_url)
             }
             ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mTensors[i]));
         }
-        else if (i == 0)
+        */
+        if (i == 0)
         {
+            printf("Debug: Tensor ID - mInputTensor[%d]\n",i);
             ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mInputTensor));
         }
         else if (i == (mNum_params - 1))
         {
+            printf("Debug: Tensor ID - mOutputTensor[%d]\n",i);
             ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mOutputTensor));
         }
     }

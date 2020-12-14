@@ -60,8 +60,8 @@ DGtest::DGtest(const char* model_url) {
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
     mNN_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
-    if(vxGetStatus((vx_reference)nn_kernel)) {
-        printf("ERROR: vxImportKernelFromURL() failed for nn_kernel\n");
+    if(vxGetStatus((vx_reference)mNN_kernel)) {
+        printf("ERROR: vxImportKernelFromURL() failed for NN_kernel\n");
         exit(-1);
     }
 

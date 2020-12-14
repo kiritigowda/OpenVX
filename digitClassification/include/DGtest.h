@@ -54,4 +54,14 @@ private:
      */
     vx_tensor mOutputTensor;
 
+    /**
+     *  Node will be used for the inference
+     */
+    vx_node mNode; 
+
+    /**
+     *  Kernel will be used for the inference
+     */
+    vx_kernel mNN_kernel; 
+
 };

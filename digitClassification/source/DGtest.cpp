@@ -80,6 +80,7 @@ DGtest::DGtest(const char *model_url)
     //Get nnef kernel
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
+    printf("Debug: NNEF Model URL - [%s]\n",model_url);
     mNN_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
     if (vxGetStatus((vx_reference)mNN_kernel))
     {
@@ -100,6 +101,7 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxQueryKernel(...) failed (%d)\n", status);
         exit(-1);
     }
+    printf("Debug: Num Parameters - [%d]\n",mNum_params);
 
     // query parameters of kernel to create tensor objects and add to node
     for (vx_uint32 i = 0; i < mNum_params; i++)
@@ -112,6 +114,7 @@ DGtest::DGtest(const char *model_url)
 
             if (VX_TYPE_TENSOR == type)
             {
+                printf("Debug: Tensor ID - mTensors[%d]\n",i);
                 vx_meta_format meta;
                 vx_size num_dims;
                 vx_size n_size[50];

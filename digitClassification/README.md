@@ -16,8 +16,9 @@ DGtest is a tutorial program for those who are new to OpenVX. It runs inference 
 
 * **Step - 1:** Build and install [Conformant OpenVX Implementation](https://github.com/KhronosGroup/OpenVX-sample-impl). In this example we will use the OpenVX Sample Implementation available on [GitHub](https://github.com/KhronosGroup/OpenVX-sample-impl)
 
-```
-Build OpenVX on Linux
+#### Build OpenVX on Linux
+
+``` 
 
 * Git Clone project with a recursive flag to get submodules
 
@@ -31,12 +32,15 @@ Build OpenVX on Linux
 
 * **Step - 2:** Export OpenVX Directory Path
 
-```
+``` 
+
 export OPENVX_DIR=$(pwd)/install/Linux/x64/Debug
 ```
+
 * **Step - 3:** Clone the OpenVX project and build the Digit Classification application
 
-```
+``` 
+
 cd ~/ && mkdir OpenVXSample-nnef
 cd OpenVXSample-nnef/
 git clone https://github.com/kiritigowda/openvx.git
@@ -44,16 +48,16 @@ git clone https://github.com/kiritigowda/openvx.git
 
 * **Step - 4:** CMake and Build the Digit Classification application
 
-```
+``` 
+
 mkdir nnef-build && cd nnef-build
-cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so ../openvx/digitClassification/
+cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../openvx/digitClassification/
 make
 ```
 
-### Usage
+* **Step - 5:** Run Digit Classification application
 
- Usage: 
- 
- ```
- ./DGtest [MNIST NNEF MODEL URL]
+``` 
+
+ ./DGtest ../openvx/digitClassification/mnist-nnef
  ```

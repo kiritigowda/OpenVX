@@ -24,7 +24,7 @@ This repository has developer help, tools, and examples to make development with
 
 * Check hardware version
 ```
-cat /proc/device-tree/model
+cat /proc/device-tree/model && pinout
 ```
 
 * Check Raspbian version on Raspberry Pi

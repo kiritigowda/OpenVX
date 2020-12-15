@@ -18,7 +18,23 @@ This repository has developer help, tools, and examples to make development with
 
 ## OpenVX Implementation for Raspberry Pi
 
-<p align="center"> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="10%" src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png" /> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="8%" src="https://svgsilh.com/svg/156116.svg"/> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="40%" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/OpenVX_logo.svg/1920px-OpenVX_logo.svg.png"/> </p> 
+<p align="center"> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="10%" src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png" /> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="8%" src="https://svgsilh.com/svg/156116.svg"/> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="40%" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/OpenVX_logo.svg/1920px-OpenVX_logo.svg.png"/> </p>
+
+### Check Hardware Version
+
+* Check hardware version
+```
+cat /proc/device-tree/model
+```
+
+* Check Raspbian version on Raspberry Pi
+```
+cat /etc/os-release
+```
+* Check Kernel version on Raspberry Pi
+```
+uname -a
+```
 
 ### Vision, Enhanced Vision, & Neural Net Conformance Feature Set
 

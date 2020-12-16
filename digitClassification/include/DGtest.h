@@ -13,7 +13,7 @@ public:
     /**
      * Constructor
      */
-    DGtest(const char* model_url);
+    DGtest(const char *model_url);
 
     /**
      * Destructor
@@ -23,15 +23,14 @@ public:
     /**
      *  Run the inference
      */
-    int runInference(cv::Mat &image); 
+    int runInference(cv::Mat &image);
 
     /**
      *  Get the inference result
      */
-    int getResult(); 
+    int getResult();
 
 private:
-
     /**
      *  Inference result
      */
@@ -41,7 +40,7 @@ private:
      *  Context that will be used for the inference
      */
     vx_context mContext;
-    
+
     /**
      *  Graph that will be used for the inference
      */
@@ -51,7 +50,7 @@ private:
      *  Graph that will be used for the inference
      */
     vx_tensor mInputTensor;
-    
+
     /**
      *  Graph that will be used for the inference
      */
@@ -60,7 +59,7 @@ private:
     /**
      *  Node will be used for the inference
      */
-    vx_node mNode; 
+    vx_node mNode;
 
     /**
      *  Kernel will be used for the inference

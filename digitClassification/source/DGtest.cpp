@@ -228,9 +228,6 @@ int DGtest::runInference(Mat &image)
     vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localOutputTensor = new float[outputTensorSize];
     memset(localOutputTensor, 0, sizeof(float) * outputTensorSize);
-    vx_size *tensorStride;
-    vx_size *viewStart;
-    vx_size *viewEnd;
     *(viewStart) = 0;
     *(viewEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensorStride) = sizeof(vx_float32);

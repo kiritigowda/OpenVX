@@ -3,7 +3,8 @@
 #include <opencv2/opencv.hpp>
 #include "DGtest.h"
 
-struct CallbackData {
+struct CallbackData
+{
     cv::String windowName;
     cv::Mat image;
     bool isDrawing = false;
@@ -16,8 +17,8 @@ public:
     /**
      * Constructor
      */
-    UserInterface(const char* weights);
-    
+    UserInterface(const char *weights);
+
     /**
      * Destructor
      */
@@ -31,8 +32,8 @@ public:
     /**
      * Mouse function for drawing
      */
-    static void onMouse(int event, int x, int y, int, void*);
- 
+    static void onMouse(int event, int x, int y, int, void *);
+
 private:
     /**
      *  Main window name for user interface

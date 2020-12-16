@@ -152,7 +152,7 @@ int DGtest::runInference(Mat &image)
     float *ptr;
 
     // query tensor for the dimension
-    vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4);
+    ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
 
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
@@ -167,12 +167,15 @@ int DGtest::runInference(Mat &image)
             *dst++ = src[0];
         }
     }
-    vx_size *tensor_stride;
-    vx_size *tensorEnd;
-    *(tensorEnd) = (dims[0] * dims[1] * dims[2]);
-    *(tensor_stride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, 0, tensorEnd,
-                             tensor_stride , (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+    vx_size *tensorStride;
+    vx_size *viewStart;
+    vx_size *viewEnd;
+    *(viewStart) = 0;
+    *(viewEnd) = (dims[0] * dims[1] * dims[2]);
+    *(tensorStride) = sizeof(vx_float32);
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
+                                         tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+    delete[] localInputTensor;
 
     // copy image to input tensor
     /*
@@ -200,6 +203,7 @@ int DGtest::runInference(Mat &image)
     }
 
     // get the output result from output tensor
+    /*
     status = vxMapTensorPatch(mOutputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST);
     if (status)
     {
@@ -215,6 +219,27 @@ int DGtest::runInference(Mat &image)
         std::cerr << "ERROR: vxUnmapTensorPatch() failed for mOutputTensor" << std::endl;
         return -1;
     }
+    */
+
+    // query tensor for the dimension
+    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
+
+    // copy output tensor
+    vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
+    float *localOutputTensor = new float[outputTensorSize];
+    memset(localOutputTensor, 0, sizeof(float) * outputTensorSize);
+    vx_size *tensorStride;
+    vx_size *viewStart;
+    vx_size *viewEnd;
+    *(viewStart) = 0;
+    *(viewEnd) = (dims[0] * dims[1] * dims[2]);
+    *(tensorStride) = sizeof(vx_float32);
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
+                                         tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+
+    mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));
+
+    delete[] localOutputTensor;
 
     return 0;
 }

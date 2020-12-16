@@ -6,14 +6,16 @@
 using namespace cv;
 using namespace std;
 
-UserInterface::UserInterface(const char* model_url) {
-    // constructs a DGtest detector 
+UserInterface::UserInterface(const char *model_url)
+{
+    // constructs a DGtest detector
     mDetector = make_unique<DGtest>(model_url);
 }
 
 UserInterface::~UserInterface() {}
 
-void UserInterface::startUI() {
+void UserInterface::startUI()
+{
     CallbackData callbackData;
     callbackData.windowName = mWindow;
     cvui::init(mProgressWindow);
@@ -22,30 +24,34 @@ void UserInterface::startUI() {
     moveWindow(mProgressWindow, 1040, 500);
 
     Mat img(300, 300, CV_8UC3, Scalar(0, 0, 0));
-    copyMakeBorder(img, img, 20, 20, 20, 20, BORDER_CONSTANT, Scalar(69,51,0));
-		
+    copyMakeBorder(img, img, 20, 20, 20, 20, BORDER_CONSTANT, Scalar(69, 51, 0));
+
     Mat progressImage(300, 250, CV_8UC3, Scalar(223, 223, 223));
 
     callbackData.image = img.clone();
     Mat cloneImg = progressImage.clone();
     setMouseCallback(mWindow, UserInterface::onMouse, &callbackData);
-    
+
     imshow(callbackData.windowName, callbackData.image);
-    
+
     int key;
 
-    cout << endl << "Press ESC to exit" << endl;
+    cout << endl
+         << "Press ESC to exit" << endl;
 
-    do {
+    do
+    {
         key = waitKey(20);
         cvui::text(cloneImg, 75, 30, "Result", 1, 0x000000);
-        if (cvui::button(cloneImg, 30, 250, 70, 25, "Clear")) {
+        if (cvui::button(cloneImg, 30, 250, 70, 25, "Clear"))
+        {
             cloneImg = progressImage.clone();
             callbackData.image = img.clone();
             imshow(mWindow, callbackData.image);
         }
-        
-        if (cvui::button(cloneImg, 140, 250, 70, 25, "Run")) {
+
+        if (cvui::button(cloneImg, 140, 250, 70, 25, "Run"))
+        {
             Mat crop = callbackData.image(Rect(20, 20, 300, 300));
             mDetector->runInference(crop);
             cloneImg = progressImage.clone();
@@ -56,16 +62,18 @@ void UserInterface::startUI() {
         cvui::update();
         // Show window content
         cvui::imshow(mProgressWindow, cloneImg);
-        
+
     } while (key != 27);
 
     destroyAllWindows();
 }
 
-void UserInterface::onMouse(int event, int x, int y, int, void *data) {
-    CallbackData *callbackData = (CallbackData *) data;
-    
-    switch(event){
+void UserInterface::onMouse(int event, int x, int y, int, void *data)
+{
+    CallbackData *callbackData = (CallbackData *)data;
+
+    switch (event)
+    {
 
     case CV_EVENT_LBUTTONDOWN:
         callbackData->isDrawing = true;
@@ -82,7 +90,8 @@ void UserInterface::onMouse(int event, int x, int y, int, void *data) {
         break;
 
     case CV_EVENT_MOUSEMOVE:
-        if(callbackData->isDrawing) {
+        if (callbackData->isDrawing)
+        {
             circle(callbackData->image, Point(x, y), 5, Scalar(255, 255, 255), 10, CV_AA);
             imshow(callbackData->windowName, callbackData->image);
         }

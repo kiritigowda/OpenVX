@@ -168,9 +168,11 @@ int DGtest::runInference(Mat &image)
         }
     }
     vx_size *tensor_stride;
+    vx_size *tensorEnd;
+    *(tensorEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensor_stride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, 0, 784,
-                             tensor_stride , (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST)));
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, 0, tensorEnd,
+                             tensor_stride , (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
 
     // copy image to input tensor
     /*

@@ -102,8 +102,8 @@ DGtest::DGtest(const char *model_url)
     }
 
     //add input and output tensors to the node
-    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 0, (vx_reference) mInputTensor));
-    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 1, (vx_reference) mOutputTensor));
+    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 0, (vx_reference)mInputTensor));
+    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 1, (vx_reference)mOutputTensor));
 
     //verify the graph
     status = vxVerifyGraph(mGraph);
@@ -154,22 +154,32 @@ int DGtest::runInference(Mat &image)
     // query tensor for the dimension
     vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4);
 
+    // convert image to tensor
+    vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
+    float *localInputTensor = new float[inputTensorSize];
+    memset(localInputTensor, 0, sizeof(float) * inputTensorSize);
+    for (vx_size y = 0; y < dims[1]; y++)
+    {
+        unsigned char *src = img.data + y * dims[0] * dims[2];
+        float *dst = localInputTensor + ((y * stride[1]) >> 2);
+        for (vx_size x = 0; x < dims[0]; x++, src++)
+        {
+            *dst++ = src[0];
+        }
+    }
+    const vx_size *view_start = 0;
+    const vx_size *view_end = inputTensorSize;
+    const vx_size *user_stride = sizeof(vx_float32);
+    vxCopyTensorPatch(mInputTensor, 4, view_start, view_end,
+                              user_stride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST))
+
     // copy image to input tensor
+    /*
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
     if (status)
     {
         std::cerr << "ERROR: vxMapTensorPatch() failed for mInputTensor" << std::endl;
         return -1;
-    }
-
-    for (vx_size y = 0; y < dims[1]; y++)
-    {
-        unsigned char *src = img.data + y * dims[0] * dims[2];
-        float *dst = ptr + ((y * stride[1]) >> 2);
-        for (vx_size x = 0; x < dims[0]; x++, src++)
-        {
-            *dst++ = src[0];
-        }
     }
 
     status = vxUnmapTensorPatch(mInputTensor, map_id);
@@ -178,6 +188,7 @@ int DGtest::runInference(Mat &image)
         std::cerr << "ERROR: vxUnmapTensorPatch() failed for mInputTensor" << std::endl;
         return -1;
     }
+    */
 
     //process the graph
     status = vxProcessGraph(mGraph);

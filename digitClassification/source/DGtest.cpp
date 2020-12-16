@@ -167,11 +167,8 @@ int DGtest::runInference(Mat &image)
             *dst++ = src[0];
         }
     }
-    const vx_size *view_start = 0;
-    const vx_size *view_end = inputTensorSize;
-    const vx_size *user_stride = sizeof(vx_float32);
-    vxCopyTensorPatch(mInputTensor, 4, view_start, view_end,
-                              user_stride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST))
+    vxCopyTensorPatch(mInputTensor, 4, 0, inputTensorSize,
+                              sizeof(vx_float32), (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST))
 
     // copy image to input tensor
     /*

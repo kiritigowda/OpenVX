@@ -68,7 +68,5 @@ private:
     vx_kernel mNN_kernel;
 
     // variables
-    vx_uint32 mNum_params, i;
-    vx_tensor mTensors[MAX_TENSORS] = { NULL };
-
+    vx_uint32 mNum_params;
 };

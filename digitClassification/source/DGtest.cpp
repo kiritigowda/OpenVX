@@ -80,7 +80,6 @@ DGtest::DGtest(const char *model_url)
     //Get nnef kernel
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
-    printf("Debug: NNEF Model URL - [%s]\n",model_url);
     mNN_kernel = vxImportKernelFromURL(mContext, nnef_type, model_url);
     if (vxGetStatus((vx_reference)mNN_kernel))
     {
@@ -101,53 +100,10 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxQueryKernel(...) failed (%d)\n", status);
         exit(-1);
     }
-    printf("Debug: Num Parameters - [%d]\n",mNum_params);
 
-    // query parameters of kernel to create tensor objects and add to node
-    for (vx_uint32 i = 0; i < mNum_params; i++)
-    {
-        /*if ((i != 0) || (i != (mNum_params - 1)))
-        {
-            vx_type_e type;
-            vx_parameter prm = vxGetKernelParameterByIndex(mNN_kernel, i);
-            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_TYPE, &type, sizeof(vx_type_e)));
-
-            if (VX_TYPE_TENSOR == type)
-            {
-                printf("Debug: Tensor ID - mTensors[%d]\n",i);
-                vx_meta_format meta;
-                vx_size num_dims;
-                vx_size n_size[50];
-                vx_enum tensor_type;
-                vx_int8 fixed_point_precision;
-
-                ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_META_FORMAT, &meta,
-                                                    sizeof(vx_meta_format)));
-
-                // Query data needed to create tensor
-                vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS,
-                                           &num_dims, sizeof(vx_size));
-                vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS,
-                                           &n_size, sizeof(n_size));
-                vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE,
-                                           &tensor_type, sizeof(vx_enum));
-
-                mTensors[i] = vxCreateTensor(mContext, num_dims, n_size, VX_TYPE_FLOAT32, 0);
-            }
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mTensors[i]));
-        }
-        */
-        if (i == 0)
-        {
-            printf("Debug: Tensor ID - mInputTensor[%d]\n",i);
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mInputTensor));
-        }
-        else if (i == (mNum_params - 1))
-        {
-            printf("Debug: Tensor ID - mOutputTensor[%d]\n",i);
-            ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, i, (vx_reference)mOutputTensor));
-        }
-    }
+    //add input and output tensors to the node
+    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 0, (vx_reference) mInputTensor));
+    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 1, (vx_reference) mOutputTensor));
 
     //verify the graph
     status = vxVerifyGraph(mGraph);
@@ -169,12 +125,6 @@ DGtest::~DGtest()
     ERROR_CHECK_STATUS(vxReleaseKernel(&mNN_kernel));
     //release the graph
     ERROR_CHECK_STATUS(vxReleaseGraph(&mGraph));
-    // release internal tensors
-    for (vx_uint32 i = 0; i < mNum_params; i++)
-    {
-        if ((i != 0) || (i != (mNum_params - 1)))
-            ERROR_CHECK_STATUS(vxReleaseTensor(&mTensors[i]));
-    }
     // release context
     ERROR_CHECK_STATUS(vxReleaseContext(&mContext));
 };

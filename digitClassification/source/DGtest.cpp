@@ -48,7 +48,9 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxCreateContext() failed\n");
         exit(-1);
     }
-    vxRegisterLogCallback(mContext, log_callback, vx_false_e);
+
+    // register logging
+    ERROR_CHECK_STATUS(vxRegisterLogCallback(mContext, log_callback, vx_false_e));
 
     // create graph
     mGraph = vxCreateGraph(mContext);
@@ -112,6 +114,10 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxVerifyGraph(...) failed (%d)\n", status);
         exit(-1);
     }
+    else
+    {
+        printf("SUCCESS: vxVerifyGraph Passed for NNEF Import Kernel Graph [Status:%d]\n", status);
+    }
 };
 
 DGtest::~DGtest()
@@ -153,7 +159,6 @@ int DGtest::runInference(Mat &image)
 
     // query tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
-
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localInputTensor = new float[inputTensorSize];
@@ -175,8 +180,8 @@ int DGtest::runInference(Mat &image)
     *(tensorStride) = sizeof(vx_float32);
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
                                          tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
-    delete[] localInputTensor;
 
+    printf("DEBUG: vxCopyTensorPatch Passed Input Tensor\n");
     // copy image to input tensor
     /*
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
@@ -201,6 +206,10 @@ int DGtest::runInference(Mat &image)
         std::cerr << "ERROR: vxProcessGraph() failed" << std::endl;
         return -1;
     }
+    else
+    {
+        printf("DEBUG: vxProcessGraph Passed\n");
+    }
 
     // get the output result from output tensor
     /*
@@ -223,7 +232,6 @@ int DGtest::runInference(Mat &image)
 
     // query tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
-
     // copy output tensor
     vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localOutputTensor = new float[outputTensorSize];
@@ -234,8 +242,11 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
                                          tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
 
+    printf("DEBUG: vxCopyTensorPatch Passed Output Tensor\n");
+
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));
 
+    delete[] localInputTensor;
     delete[] localOutputTensor;
 
     return 0;

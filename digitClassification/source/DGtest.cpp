@@ -50,7 +50,7 @@ DGtest::DGtest(const char *model_url)
     }
 
     // register logging
-    ERROR_CHECK_STATUS(vxRegisterLogCallback(mContext, log_callback, vx_false_e));
+    vxRegisterLogCallback(mContext, log_callback, vx_false_e);
 
     // create graph
     mGraph = vxCreateGraph(mContext);

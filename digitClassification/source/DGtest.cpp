@@ -152,10 +152,10 @@ int DGtest::runInference(Mat &image)
     // add border to the image so that the digit will go center and become 28 x 28 image
     copyMakeBorder(img, img, 2, 2, 2, 2, BORDER_CONSTANT, Scalar(0, 0, 0));
 
+    printf("DEBUG: OpenCV Digits Image Passed Input Tensor\n");
+
     vx_size dims[4] = {1, 1, 1, 1}, stride[4];
     vx_status status;
-    vx_map_id map_id;
-    float *ptr;
 
     // query tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
@@ -172,6 +172,9 @@ int DGtest::runInference(Mat &image)
             *dst++ = src[0];
         }
     }
+    
+    printf("DEBUG: OpenCV Image to Tensor Conversion Passed\n");
+
     vx_size *tensorStride;
     vx_size *viewStart;
     vx_size *viewEnd;
@@ -179,16 +182,29 @@ int DGtest::runInference(Mat &image)
     *(viewEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensorStride) = sizeof(vx_float32);
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
-                                         tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+                                         tensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
 
     printf("DEBUG: vxCopyTensorPatch Passed Input Tensor\n");
     // copy image to input tensor
     /*
+    vx_map_id map_id;
+    float *ptr;
+
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
     if (status)
     {
         std::cerr << "ERROR: vxMapTensorPatch() failed for mInputTensor" << std::endl;
         return -1;
+    }
+    
+    for (vx_size y = 0; y < dims[1]; y++)
+    {
+        unsigned char *src = img.data + y * dims[0] * dims[2];
+        float *dst = ptr + ((y * stride[1]) >> 2);
+        for (vx_size x = 0; x < dims[0]; x++, src++)
+        {
+            *dst++ = src[0];
+        }
     }
 
     status = vxUnmapTensorPatch(mInputTensor, map_id);
@@ -240,7 +256,7 @@ int DGtest::runInference(Mat &image)
     *(viewEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensorStride) = sizeof(vx_float32);
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
-                                         tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+                                         tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
 
     printf("DEBUG: vxCopyTensorPatch Passed Output Tensor\n");
 

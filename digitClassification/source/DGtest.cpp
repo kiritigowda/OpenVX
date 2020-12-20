@@ -169,7 +169,7 @@ int DGtest::runInference(Mat &image)
     printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
 
     vx_size tensorStride[num_of_dims] = {0};
-    tensorStride[0] = {sizeof(vx_float32)};
+    tensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
         tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
@@ -179,7 +179,7 @@ int DGtest::runInference(Mat &image)
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localInputTensor = new float[inputTensorSize];
-    memset(localInputTensor, 0, sizeof(vx_float32) * inputTensorSize);
+    memset(localInputTensor, 0, (sizeof(vx_float32) * inputTensorSize));
 
     for (vx_size y = 0; y < dims[1]; y++)
     {
@@ -242,7 +242,7 @@ int DGtest::runInference(Mat &image)
     }
     else
     {
-       printf("STATUS: vxProcessGraph successful\n"); 
+        printf("STATUS: vxProcessGraph successful\n");
     }
 
     /*
@@ -277,9 +277,9 @@ int DGtest::runInference(Mat &image)
     // copy output tensor
     vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localOutputTensor = new float[outputTensorSize];
-    memset(localOutputTensor, 0, sizeof(vx_float32) * outputTensorSize);
+    memset(localOutputTensor, 0, (sizeof(vx_float32) * outputTensorSize));
 
-    tensorStride[0] = {sizeof(vx_float32)};
+    tensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
         tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
@@ -288,8 +288,11 @@ int DGtest::runInference(Mat &image)
                                          tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
-    mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));
-    printf("STATUS: Output Tensor Analysis Passed %d\n",mDigit);
+    for (int i = 0; i < outputTensorSize; i++)
+        printf("STATUS: Output[%d] - %f\n", localOutputTensor[i]);
+
+    mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, (localOutputTensor + 10)));
+    printf("STATUS: Output Tensor Analysis Passed %d\n", mDigit);
 
     delete localInputTensor;
     delete localOutputTensor;

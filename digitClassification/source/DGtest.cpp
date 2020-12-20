@@ -237,8 +237,12 @@ int DGtest::runInference(Mat &image)
     status = vxProcessGraph(mGraph);
     if (status != VX_SUCCESS)
     {
-        printf("ERROR: vvxProcessGraph failed (%d)\n", status);
+        printf("ERROR: vxProcessGraph failed (%d)\n", status);
         return status;
+    }
+    else
+    {
+       printf("STATUS: vxProcessGraph successful\n"); 
     }
 
     /*
@@ -285,9 +289,10 @@ int DGtest::runInference(Mat &image)
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));
+    printf("STATUS: Output Tensor Analysis Passed %d\n",mDigit);
 
-    delete[] localInputTensor;
-    delete[] localOutputTensor;
+    delete localInputTensor;
+    delete localOutputTensor;
 
     return 0;
 }

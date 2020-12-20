@@ -152,36 +152,45 @@ int DGtest::runInference(Mat &image)
     // add border to the image so that the digit will go center and become 28 x 28 image
     copyMakeBorder(img, img, 2, 2, 2, 2, BORDER_CONSTANT, Scalar(0, 0, 0));
 
-    /*
-    vx_size dims[4] = {1, 1, 1, 1}, stride[4];
+    // set result to invalid
+    mDigit = -1;
+
     vx_status status;
-    // query tensor for the dimension
-    ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
+    vx_size num_of_dims;
+    vx_size dims[4] = {1, 1, 1, 1};
+    // query input tensor for the num dimensions
+    ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
+    // query input tensor for the dimension
+    ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
+    printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", dims[0], dims[1], dims[2], dims[3]);
+
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localInputTensor = new float[inputTensorSize];
-    memset(localInputTensor, 0, sizeof(float) * inputTensorSize);
+    memset(localInputTensor, 0, sizeof(vx_float32) * inputTensorSize);
     for (vx_size y = 0; y < dims[1]; y++)
     {
         unsigned char *src = img.data + y * dims[0] * dims[2];
-        float *dst = localInputTensor + ((y * stride[1]) >> 2);
+        float *dst = localInputTensor + ((y * sizeof(vx_float32)) >> 2);
         for (vx_size x = 0; x < dims[0]; x++, src++)
         {
             *dst++ = src[0];
         }
     }
-    printf("DEBUG: OpenCV Image to Tensor Conversion Passed\n");
+    printf("STATUS: Image to Tensor Conversion Successful\n");
+
     vx_size *tensorStride;
     vx_size *viewStart;
     vx_size *viewEnd;
+
     *(viewStart) = 0;
     *(viewEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensorStride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, viewEnd,
                                          tensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
-    printf("DEBUG: vxCopyTensorPatch Passed Input Tensor\n");
-    */
+    printf("STATUS: vxCopyTensorPatch Passed for Input Tensor\n");
 
+    /*
     // copy image to input tensor data
     vx_size dims[4] = {1, 1, 1, 1}, stride[4];
     vx_status status;
@@ -216,6 +225,7 @@ int DGtest::runInference(Mat &image)
         printf("ERROR: vxUnmapTensorPatch(mInputTensor) failed (%d)\n", status);
         return status;
     }
+    */
 
     //process the graph
     status = vxProcessGraph(mGraph);
@@ -225,6 +235,7 @@ int DGtest::runInference(Mat &image)
         return status;
     }
 
+    /*
     // query output tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
     printf("STATUS: vxQueryTensor(mOutputTensor) Dimensions - [%d, %d, %d, %d])\n", dims[0],dims[1],dims[2],dims[3]);
@@ -245,24 +256,30 @@ int DGtest::runInference(Mat &image)
         printf("ERROR: vxUnmapTensorPatch(mOutputTensor) failed (%d)\n", status);
         return status;
     }
+    */
 
-    /*
-    // query tensor for the dimension
-    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
+    // query input tensor for the num dimensions
+    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
+    // query input tensor for the dimension
+    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
+    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", dims[0], dims[1], dims[2], dims[3]);
+
     // copy output tensor
     vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localOutputTensor = new float[outputTensorSize];
-    memset(localOutputTensor, 0, sizeof(float) * outputTensorSize);
+    memset(localOutputTensor, 0, sizeof(vx_float32) * outputTensorSize);
+
     *(viewStart) = 0;
     *(viewEnd) = (dims[0] * dims[1] * dims[2]);
     *(tensorStride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, 4, viewStart, viewEnd,
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, viewEnd,
                                          tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
-    printf("DEBUG: vxCopyTensorPatch Passed Output Tensor\n");
+    printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
+
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));
+
     delete[] localInputTensor;
     delete[] localOutputTensor;
-    */
 
     return 0;
 }

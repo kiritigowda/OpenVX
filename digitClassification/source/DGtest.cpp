@@ -162,7 +162,7 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
     // query input tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-    printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", dims[0], dims[1], dims[2], dims[3]);
+    printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
 
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
@@ -262,7 +262,7 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
     // query input tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", dims[0], dims[1], dims[2], dims[3]);
+    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
 
     // copy output tensor
     vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);

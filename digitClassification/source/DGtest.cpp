@@ -88,7 +88,12 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxImportKernelFromURL() failed for NN_kernel\n");
         exit(-1);
     }
+    else
+    {
+        printf("STATUS: vxImportKernelFromURL() for %s model: %s successful\n", nnef_type, model_url);
+    }
 
+    // create nn node for the graph
     mNode = vxCreateGenericNode(mGraph, mNN_kernel);
     if (vxGetStatus((vx_reference)mNode))
     {
@@ -116,7 +121,7 @@ DGtest::DGtest(const char *model_url)
     }
     else
     {
-        printf("SUCCESS: vxVerifyGraph Passed for NNEF Import Kernel Graph [Status:%d]\n", status);
+        printf("STATUS: vxVerifyGraph Passed for NNEF Import Kernel Graph\n");
     }
 };
 
@@ -137,7 +142,6 @@ DGtest::~DGtest()
 
 int DGtest::runInference(Mat &image)
 {
-
     Mat img = image.clone();
 
     // convert to grayscale image
@@ -179,15 +183,12 @@ int DGtest::runInference(Mat &image)
     }
     printf("STATUS: Image to Tensor Conversion Successful\n");
 
-    vx_size *tensorStride;
-    vx_size *viewStart;
-    vx_size *viewEnd;
+    vx_size tensorStride[num_of_dims] = {sizeof(vx_float32)};
+    vx_size viewStart[num_of_dims] = {0};
+    vx_size inputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
 
-    *(viewStart) = 0;
-    *(viewEnd) = (dims[0] * dims[1] * dims[2]);
-    *(tensorStride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, viewEnd,
-                                         tensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, inputViewEnd,
+                                         tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Input Tensor\n");
 
     /*
@@ -269,11 +270,9 @@ int DGtest::runInference(Mat &image)
     float *localOutputTensor = new float[outputTensorSize];
     memset(localOutputTensor, 0, sizeof(vx_float32) * outputTensorSize);
 
-    *(viewStart) = 0;
-    *(viewEnd) = (dims[0] * dims[1] * dims[2]);
-    *(tensorStride) = sizeof(vx_float32);
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, viewEnd,
-                                         tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+    vx_size outputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, outputViewEnd,
+                                         tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));

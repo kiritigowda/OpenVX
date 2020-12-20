@@ -289,7 +289,7 @@ int DGtest::runInference(Mat &image)
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
     for (int i = 0; i < outputTensorSize; i++)
-        printf("STATUS: Output[%d] - %f\n", localOutputTensor[i]);
+        printf("STATUS: Output[%d] - %f\n", i, localOutputTensor[i]);
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, (localOutputTensor + 10)));
     printf("STATUS: Output Tensor Analysis Passed %d\n", mDigit);

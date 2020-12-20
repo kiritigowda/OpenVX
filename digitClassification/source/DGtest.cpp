@@ -280,7 +280,7 @@ int DGtest::runInference(Mat &image)
     {
         tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
     }
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, dims,
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, viewStart, dims,
                                          tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 

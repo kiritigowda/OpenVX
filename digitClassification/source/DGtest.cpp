@@ -188,8 +188,9 @@ int DGtest::runInference(Mat &image)
     vx_map_id map_id;
     float *ptr;
 
-    // query tensor for the dimension
+    // query input tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
+    printf("STATUS: vxQueryTensor(InputTensor) Dimensions - [%d, %d, %d, %d])\n", dims[0],dims[1],dims[2],dims[3]);
 
     // copy image to input tensor
     status = vxMapTensorPatch(mInputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST);
@@ -223,6 +224,10 @@ int DGtest::runInference(Mat &image)
         printf("ERROR: vvxProcessGraph failed (%d)\n", status);
         return status;
     }
+
+    // query output tensor for the dimension
+    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * 4));
+    printf("STATUS: vxQueryTensor(mOutputTensor) Dimensions - [%d, %d, %d, %d])\n", dims[0],dims[1],dims[2],dims[3]);
 
     // get the output result from output tensor
     status = vxMapTensorPatch(mOutputTensor, 4, nullptr, nullptr, &map_id, stride, (void **)&ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST);

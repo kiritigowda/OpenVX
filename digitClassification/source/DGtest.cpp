@@ -172,7 +172,7 @@ int DGtest::runInference(Mat &image)
     tensorStride[0] = {sizeof(vx_float32)};
     for (int j = 1; j < num_of_dims; j++)
     {
-        tensor_strides[j] = tensor_strides[j - 1] * dims[j - 1];
+        tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
     }
     vx_size viewStart[num_of_dims] = {0};
     vx_size inputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
@@ -185,7 +185,7 @@ int DGtest::runInference(Mat &image)
     for (vx_size y = 0; y < dims[1]; y++)
     {
         unsigned char *src = img.data + y * dims[0] * dims[2];
-        float *dst = localInputTensor + ((y * tensor_strides[1]) >> 2);
+        float *dst = localInputTensor + ((y * tensorStride[1]) >> 2);
         for (vx_size x = 0; x < dims[0]; x++, src++)
         {
             *dst++ = src[0];
@@ -279,7 +279,7 @@ int DGtest::runInference(Mat &image)
     tensorStride[0] = {sizeof(vx_float32)};
     for (int j = 1; j < num_of_dims; j++)
     {
-        tensor_strides[j] = tensor_strides[j - 1] * dims[j - 1];
+        tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
     }
     vx_size outputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, outputViewEnd,

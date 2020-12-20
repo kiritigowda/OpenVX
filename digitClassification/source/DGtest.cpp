@@ -168,24 +168,30 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
     printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
 
+    vx_size tensorStride[num_of_dims] = {0};
+    tensorStride[0] = {sizeof(vx_float32)};
+    for (int j = 1; j < num_of_dims; j++)
+    {
+        tensor_strides[j] = tensor_strides[j - 1] * dims[j - 1];
+    }
+    vx_size viewStart[num_of_dims] = {0};
+    vx_size inputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
+
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
     float *localInputTensor = new float[inputTensorSize];
     memset(localInputTensor, 0, sizeof(vx_float32) * inputTensorSize);
+
     for (vx_size y = 0; y < dims[1]; y++)
     {
         unsigned char *src = img.data + y * dims[0] * dims[2];
-        float *dst = localInputTensor + ((y * sizeof(vx_float32)) >> 2);
+        float *dst = localInputTensor + ((y * tensor_strides[1]) >> 2);
         for (vx_size x = 0; x < dims[0]; x++, src++)
         {
             *dst++ = src[0];
         }
     }
     printf("STATUS: Image to Tensor Conversion Successful\n");
-
-    vx_size tensorStride[num_of_dims] = {sizeof(vx_float32)};
-    vx_size viewStart[num_of_dims] = {0};
-    vx_size inputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
 
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, inputViewEnd,
                                          tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
@@ -270,6 +276,11 @@ int DGtest::runInference(Mat &image)
     float *localOutputTensor = new float[outputTensorSize];
     memset(localOutputTensor, 0, sizeof(vx_float32) * outputTensorSize);
 
+    tensorStride[0] = {sizeof(vx_float32)};
+    for (int j = 1; j < num_of_dims; j++)
+    {
+        tensor_strides[j] = tensor_strides[j - 1] * dims[j - 1];
+    }
     vx_size outputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, outputViewEnd,
                                          tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));

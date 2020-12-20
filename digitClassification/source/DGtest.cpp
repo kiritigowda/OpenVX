@@ -175,7 +175,6 @@ int DGtest::runInference(Mat &image)
         tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
     }
     vx_size viewStart[num_of_dims] = {0};
-    vx_size inputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
 
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
@@ -193,8 +192,8 @@ int DGtest::runInference(Mat &image)
     }
     printf("STATUS: Image to Tensor Conversion Successful\n");
 
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, inputViewEnd,
-                                         tensorStride, (vx_char *)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, dims,
+                                         tensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Input Tensor\n");
 
     /*
@@ -281,9 +280,8 @@ int DGtest::runInference(Mat &image)
     {
         tensorStride[j] = tensorStride[j - 1] * dims[j - 1];
     }
-    vx_size outputViewEnd[num_of_dims]= {(dims[0] * dims[1] * dims[2])};
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, outputViewEnd,
-                                         tensorStride, (vx_char *)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, viewStart, dims,
+                                         tensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, localOutputTensor + 10));

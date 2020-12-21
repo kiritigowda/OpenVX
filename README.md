@@ -6,8 +6,8 @@
 
 This repository has developer help, tools, and examples to make development with OpenVX simple.
 
-* [Digits Classification Application](digits-classification-application)
-* [OpenVX for Raspberry Pi](openvx-implementation-for-raspberry-pi)
+* [Digits Classification Application](#digits-classification-application)
+* [OpenVX for Raspberry Pi](#openvx-implementation-for-raspberry-pi)
 
 ## Digits Classification Application
 [Digits Classification](digitClassification) is a sample tutorial program for those who are new to OpenVX. It runs inference on handwritten digits with the [MNIST](http://yann.lecun.com/exdb/mnist/) NNEF model using OpenVX [NNEF Import Kernel](https://www.khronos.org/registry/OpenVX/specs/1.3/vx_khr_feature_sets/1.1/html/vx_khr_feature_sets_1_1.html#sec_nnef) conformance profile.

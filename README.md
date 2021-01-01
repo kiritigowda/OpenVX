@@ -29,7 +29,9 @@ uname -a
 
 ### Vision, Enhanced Vision, & Neural Net Conformance Feature Set
 
-The [OpenVX 1.3 implementation](https://github.com/KhronosGroup/OpenVX-sample-impl/tree/openvx_1.3) is available on GitHub. To build and install the library follow the instructions below.
+The [OpenVX 1.3 sample implementation](https://github.com/KhronosGroup/OpenVX-sample-impl/tree/openvx_1.3) is available on GitHub. To build and install the library follow the instructions below.
+
+**NOTE:** for `optimized` OpenVX library use implementation from the hardware vendor
 
 #### Build OpenVX 1.3 on Raspberry Pi
 

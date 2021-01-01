@@ -4,17 +4,8 @@
 
 <a href="https://www.khronos.org/openvx/" target="_blank">Khronos OpenVX™</a> is an open, royalty-free standard for cross-platform acceleration of computer vision applications. OpenVX enables performance and power-optimized computer vision processing, especially important in embedded and real-time use cases such as face, body, and gesture tracking, smart video surveillance, advanced driver assistance systems (ADAS), object and scene reconstruction, augmented reality, visual inspection, robotics and more.
 
-This repository has developer help, tools, and examples to make development with OpenVX simple.
-
-* [Digits Classification Application](#digits-classification-application)
 * [OpenVX for Raspberry Pi](#openvx-implementation-for-raspberry-pi)
-
-## Digits Classification Application
-[Digits Classification](digitClassification) is a sample tutorial program for those who are new to OpenVX. It runs inference on handwritten digits with the [MNIST](http://yann.lecun.com/exdb/mnist/) NNEF model using OpenVX [NNEF Import Kernel](https://www.khronos.org/registry/OpenVX/specs/1.3/vx_khr_feature_sets/1.1/html/vx_khr_feature_sets_1_1.html#sec_nnef) conformance profile.
-
-<p align="center">
- <img src="https://github.com/GPUOpen-ProfessionalCompute-Libraries/MIVisionX/raw/master/docs/images/DGtest.gif">
-</p>
+* [Digits Classification Application](#digits-classification-application)
 
 ## OpenVX Implementation for Raspberry Pi
 
@@ -99,3 +90,11 @@ cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/l
 cmake --build .
 LD_LIBRARY_PATH=./lib ./bin/vx_test_conformance --filter=*TensorNNEF*
 ````
+
+## Digits Classification Application
+[Digits Classification](digitClassification) is a sample tutorial program for those who are new to OpenVX. It runs inference on handwritten digits with the [MNIST](http://yann.lecun.com/exdb/mnist/) NNEF model using OpenVX [NNEF Import Kernel](https://www.khronos.org/registry/OpenVX/specs/1.3/vx_khr_feature_sets/1.1/html/vx_khr_feature_sets_1_1.html#sec_nnef) conformance profile.
+
+<p align="center">
+ <img src="https://github.com/GPUOpen-ProfessionalCompute-Libraries/MIVisionX/raw/master/docs/images/DGtest.gif">
+</p>
+

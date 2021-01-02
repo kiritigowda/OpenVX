@@ -18,7 +18,7 @@ The name of this feature set is `vx_khr_nnef_import`.
 
 * Conformant OpenVX 1.3 [Implementation with NNEF Import Feature Set](https://github.com/KhronosGroup/Khronosdotorg/blob/master/api/openvx/resources.md)
 
-* [OpenCV](https://github.com/opencv/opencv/releases/tag/3.4.0)
+* [OpenCV](https://github.com/opencv/opencv/releases/tag/3.4.0) - For GUI
 
 ### Build Instructions 
 
@@ -28,12 +28,12 @@ The name of this feature set is `vx_khr_nnef_import`.
     ```
       git clone --recursive https://github.com/KhronosGroup/OpenVX-sample-impl.git
     ```
-    + Use Build.py script on `x86_64` system
+    + Use Build.py script on **x86_64** system
     ```
       cd OpenVX-sample-impl/
       python Build.py --os=Linux --arch=64 --conf=Debug --conf_nnef
     ```
-    + Use Build.py script on `Raspberry Pi` system
+    + Use Build.py script on **Raspberry Pi** system
     ```
     cd OpenVX-sample-impl/
     python Build.py --os=Linux --venum --conf=Debug --conf_nnef
@@ -41,11 +41,11 @@ The name of this feature set is `vx_khr_nnef_import`.
 
 * **Step - 2:** Export OpenVX Directory Path
 
-    + `x86_64` system
+    + **x86_64** system
     ```
     export OPENVX_DIR=$(pwd)/install/Linux/x64/Debug
     ```
-    + `Raspberry Pi` system
+    + **Raspberry Pi** system
     ```
     export OPENVX_DIR=$(pwd)/install/Linux/x32/Debug
     ```

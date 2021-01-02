@@ -72,10 +72,10 @@ make
 
     + Usage
     ```
-    ./DGtest [NNEF Model URL]
+    ./DGTest [NNEF Model URL]
     ```
     + MNIST NNEF
     ``` 
-    ./DGtest ../openvx/digitClassification/mnist-nnef
+    ./DGTest ../openvx/digitClassification/mnist-nnef
     ```
  

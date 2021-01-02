@@ -4,6 +4,7 @@
 
 <a href="https://www.khronos.org/openvx/" target="_blank">Khronos OpenVX™</a> is an open, royalty-free standard for cross-platform acceleration of computer vision applications. OpenVX enables performance and power-optimized computer vision processing, especially important in embedded and real-time use cases such as face, body, and gesture tracking, smart video surveillance, advanced driver assistance systems (ADAS), object and scene reconstruction, augmented reality, visual inspection, robotics and more.
 
+* [OpenVX overview](https://github.com/kiritigowda/OpenVX/blob/master/Khronos-OpenVX-2020.pdf)
 * [OpenVX for Raspberry Pi](#openvx-implementation-for-raspberry-pi)
 * [Digits Classification Application](#digits-classification-application)
 

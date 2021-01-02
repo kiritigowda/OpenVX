@@ -18,6 +18,8 @@ The name of this feature set is `vx_khr_nnef_import`.
 
 * Conformant OpenVX 1.3 [Implementation with NNEF Import Feature Set](https://github.com/KhronosGroup/Khronosdotorg/blob/master/api/openvx/resources.md)
 
+* Linux `X86_64` / `Raspberry Pi` system
+
 * [OpenCV](https://github.com/opencv/opencv/releases/tag/3.4.0) - For GUI
 
 ### Build Instructions 

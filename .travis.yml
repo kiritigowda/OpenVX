@@ -1,0 +1,73 @@
+# Copyright (c) 2019 - 2020 Advanced Micro Devices, Inc. All rights reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#  
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#  
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+language: cpp
+sudo: required
+dist: xenial
+os:
+  - linux
+compiler:
+  - g++
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - lcov
+  
+services:
+  - docker
+
+branches:
+  - master
+  - openvx-1.0.1
+
+install:
+  - sudo apt update
+  - sudo apt --yes install cmake
+
+before_script:
+  - git clone --recursive https://github.com/KhronosGroup/OpenVX-sample-impl.git
+  - cd OpenVX-sample-impl/
+  - python Build.py --os=Linux --arch=64 --conf=Debug --conf_nnef
+  - export OPENVX_DIR=$(pwd)/install/Linux/x64/Debug
+  - export VX_TEST_DATA_PATH=$(pwd)/cts/test_data/
+  - mkdir build-cts && cd build-cts
+  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;pthread\;dl\;m\;rt -DOPENVX_CONFORMANCE_VISION=ON -DOPENVX_USE_ENHANCED_VISION=ON -DOPENVX_CONFORMANCE_NEURAL_NETWORKS=ON ../cts/
+  - cmake --build .
+  - LD_LIBRARY_PATH=./lib ./bin/vx_test_conformance
+  - cd ../
+
+script:
+  - mkdir build && cd build
+# - cmake -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage"  -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
+  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
+  - make
+
+after_success:
+#  - lcov --directory . --capture --output-file coverage.info
+#  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+#  - lcov --list coverage.info
+#  - bash <(curl -s https://codecov.io/bash) || echo "codecov did not collect coverage reports"
+
+notifications:
+  email:
+    - kiritigowda@gmail.com

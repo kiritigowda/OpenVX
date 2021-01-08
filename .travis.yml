@@ -38,7 +38,6 @@ services:
 
 branches:
   - master
-  - openvx-1.0.1
 
 install:
   - sudo apt update
@@ -51,7 +50,7 @@ before_script:
   - export OPENVX_DIR=$(pwd)/install/Linux/x64/Debug
   - export VX_TEST_DATA_PATH=$(pwd)/cts/test_data/
   - mkdir build-cts && cd build-cts
-  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;pthread\;dl\;m\;rt -DOPENVX_CONFORMANCE_VISION=ON -DOPENVX_USE_ENHANCED_VISION=ON -DOPENVX_CONFORMANCE_NEURAL_NETWORKS=ON ../cts/
+  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt -DOPENVX_CONFORMANCE_NNEF_IMPORT=ON ../cts/
   - cmake --build .
   - LD_LIBRARY_PATH=./lib ./bin/vx_test_conformance
   - cd ../

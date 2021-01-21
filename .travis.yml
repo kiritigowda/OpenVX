@@ -49,15 +49,14 @@ before_script:
   - python Build.py --os=Linux --arch=64 --conf=Debug --conf_nnef
   - export OPENVX_DIR=$(pwd)/install/Linux/x64/Debug
   - export VX_TEST_DATA_PATH=$(pwd)/cts/test_data/
-  - mkdir build-cts && cd build-cts
+  - mkdir -p build-cts && cd build-cts
   - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt -DOPENVX_CONFORMANCE_NNEF_IMPORT=ON ../cts/
   - cmake --build .
   - LD_LIBRARY_PATH=./lib ./bin/vx_test_conformance
-  - cd ../
+  - cd ../../
 
 script:
-  - mkdir build && cd build
-# - cmake -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage"  -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
+  - mkdir -p build && cd build
   - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
   - make
 

@@ -110,11 +110,11 @@ DGtest::DGtest(const char *model_url)
             vx_tensor Tensor;
             vx_size num_of_dims;
             vx_size dims[4] = {1, 1, 1, 1};
-            STATUS_ERROR_CHECK(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-            printf("STATUS: InputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
             ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));
+            printf("STATUS: InputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);    
         }
         else if (direction == VX_OUTPUT)
         {
@@ -122,11 +122,11 @@ DGtest::DGtest(const char *model_url)
             vx_tensor Tensor;
             vx_size num_of_dims;
             vx_size dims[4] = {1, 1, 1, 1};
-            STATUS_ERROR_CHECK(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-            printf("STATUS: OutputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
             ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));
+            printf("STATUS: OutputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
         }
 
         ERROR_CHECK_STATUS(vxReleaseParameter(&prm));

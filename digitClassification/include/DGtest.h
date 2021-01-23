@@ -1,6 +1,7 @@
 #pragma once
 
 #include <VX/vx_khr_import_kernel.h>
+#include <VX/vx_compatibility.h>
 
 #define MAX_TENSORS 50
 

@@ -76,6 +76,6 @@ make
     ```
     + MNIST NNEF
     ``` 
-    ./DGTest ../openvx/digitClassification/mnist-nnef
+    ./DGTest ../openvx/digitClassification/mnist
     ```
  

@@ -112,12 +112,12 @@ DGtest::DGtest(const char *model_url)
             if (VX_TYPE_TENSOR == param_type)
             {
                 vx_meta_format meta;
-                vx_int32 tensor_type = 0
+                vx_int32 tensor_type = 0;
                 vx_size num_of_dims = 0;
                 vx_size dims[4] = {1, 1, 1, 1};
                 ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_META_FORMAT, &meta, sizeof(vx_meta_format)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(vx_size)));
-                ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims)));
+                ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof((dims[0]) * num_of_dims)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
                 printf("STATUS: InputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
             }
@@ -130,12 +130,12 @@ DGtest::DGtest(const char *model_url)
             if (VX_TYPE_TENSOR == param_type)
             {
                 vx_meta_format meta;
-                vx_int32 tensor_type = 0
+                vx_int32 tensor_type = 0;
                 vx_size num_of_dims = 0;
                 vx_size dims[4] = {1, 1, 1, 1};
                 ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_META_FORMAT, &meta, sizeof(vx_meta_format)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(vx_size)));
-                ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims)));
+                ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof((dims[0]) * num_of_dims)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
                 printf("STATUS: OutputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
             }

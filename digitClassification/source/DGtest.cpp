@@ -61,24 +61,6 @@ DGtest::DGtest(const char *model_url)
         exit(-1);
     }
 
-    // create and initialize input tensor data
-    vx_size input_dims[4] = {28, 28, 1, 1};
-    mInputTensor = vxCreateTensor(mContext, 4, input_dims, VX_TYPE_FLOAT32, 0);
-    if (vxGetStatus((vx_reference)mInputTensor))
-    {
-        printf("ERROR: vxCreateTensor() failed\n");
-        exit(-1);
-    }
-
-    // create and initialize output tensor data
-    vx_size output_dims[4] = {1, 1, 10, 1};
-    mOutputTensor = vxCreateTensor(mContext, 4, output_dims, VX_TYPE_FLOAT32, 0);
-    if (vxGetStatus((vx_reference)mOutputTensor))
-    {
-        printf("ERROR: vxCreateTensor() failed for mOutputTensor\n");
-        exit(-1);
-    }
-
     //Get nnef kernel
     char nn_type[5] = "nnef";
     vx_char *nnef_type = nn_type;
@@ -120,6 +102,13 @@ DGtest::DGtest(const char *model_url)
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
                 printf("STATUS: InputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+                // create input tensor
+                mInputTensor = vxCreateTensor(mContext, num_of_dims, dims, tensor_type, 0);
+                if (vxGetStatus((vx_reference)mInputTensor))
+                {
+                    printf("ERROR: vxCreateTensor() failed\n");
+                    exit(-1);
+                }
             }
         }
         else if (direction == VX_OUTPUT)
@@ -138,6 +127,13 @@ DGtest::DGtest(const char *model_url)
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
                 printf("STATUS: OutputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+                // create output tensor
+                mOutputTensor = vxCreateTensor(mContext, num_of_dims, dims, tensor_type, 0);
+                if (vxGetStatus((vx_reference)mOutputTensor))
+                {
+                    printf("ERROR: vxCreateTensor() failed for mOutputTensor\n");
+                    exit(-1);
+                }
             }
         }
 
@@ -226,11 +222,11 @@ int DGtest::runInference(Mat &image)
         inputTensorStride[j] = inputTensorStride[j - 1] * dims[j - 1];
     }
 
-    for (vx_size y = 0; y < dims[1]; y++)
+    for (vx_size y = 0; y < dims[2]; y++)
     {
-        unsigned char *src = img.data + y * dims[0] * dims[2];
+        unsigned char *src = img.data + y * dims[3] * dims[1];
         float *dst = localInputTensor + ((y * inputTensorStride[1]) >> 2);
-        for (vx_size x = 0; x < dims[0]; x++, src++)
+        for (vx_size x = 0; x < dims[3]; x++, src++)
         {
             *dst++ = src[0];
         }
@@ -253,14 +249,15 @@ int DGtest::runInference(Mat &image)
         printf("STATUS: vxProcessGraph Successful\n");
     }
 
+    vx_size out_dims[4] = {1, 1, 1, 1};
     // query input tensor for the num dimensions
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
     // query input tensor for the dimension
-    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+    ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &out_dims, sizeof(out_dims[0]) * num_of_dims));
+    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, out_dims[0], out_dims[1], out_dims[2], out_dims[3]);
 
     // copy output tensor
-    vx_size outputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
+    vx_size outputTensorSize = (out_dims[0] * out_dims[1] * out_dims[2] * out_dims[3]);
     float *localOutputTensor = new float[outputTensorSize];
     memset(localOutputTensor, 0, (sizeof(vx_float32) * outputTensorSize));
 
@@ -269,10 +266,10 @@ int DGtest::runInference(Mat &image)
     outputTensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
-        outputTensorStride[j] = outputTensorStride[j - 1] * dims[j - 1];
+        outputTensorStride[j] = outputTensorStride[j - 1] * out_dims[j - 1];
     }
 
-    ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, outputViewStart, dims,
+    ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, outputViewStart, out_dims,
                                          outputTensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 

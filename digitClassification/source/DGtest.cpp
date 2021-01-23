@@ -100,7 +100,7 @@ DGtest::DGtest(const char *model_url)
     vx_int32 input_num = 0, output_num = 0;
     for (i = 0; i < num_params; i++)
     {
-        vx_parameter prm = vxGetKernelParameterByIndex(nn_kernel, i);
+        vx_parameter prm = vxGetKernelParameterByIndex(mNN_kernel, i);
 
         ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_DIRECTION, &direction, sizeof(enum vx_type_e)));
 

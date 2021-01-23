@@ -107,10 +107,10 @@ DGtest::DGtest(const char *model_url)
         if (direction == VX_INPUT)
         {
             input_num++;
-            vx_tensor Tensor;
-            vx_size num_of_dims;
+            vx_tensor Tensor = 0;
+            vx_size num_of_dims = 0;
             vx_size dims[4] = {1, 1, 1, 1};
-            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(Tensor)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
             ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));
@@ -119,10 +119,10 @@ DGtest::DGtest(const char *model_url)
         else if (direction == VX_OUTPUT)
         {
             output_num++;
-            vx_tensor Tensor;
-            vx_size num_of_dims;
+            vx_tensor Tensor = 0;
+            vx_size num_of_dims = 0;
             vx_size dims[4] = {1, 1, 1, 1};
-            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(Tensor)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
             ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
             ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));

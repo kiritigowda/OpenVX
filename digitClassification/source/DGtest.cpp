@@ -216,6 +216,7 @@ int DGtest::runInference(Mat &image)
 
     vx_size inputViewStart[4] = {0};
     vx_size inputTensorStride[4] = {0};
+    
     inputTensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
@@ -225,12 +226,13 @@ int DGtest::runInference(Mat &image)
     for (vx_size y = 0; y < dims[2]; y++)
     {
         unsigned char *src = img.data + y * dims[3] * dims[1];
-        float *dst = localInputTensor + ((y * inputTensorStride[1]) >> 2);
+        float *dst = localInputTensor + ((y * inputTensorStride[2]) >> 2);
         for (vx_size x = 0; x < dims[3]; x++, src++)
         {
             *dst++ = src[0];
         }
     }
+
     printf("STATUS: Image to Tensor Conversion Successful\n");
 
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, inputViewStart, dims,

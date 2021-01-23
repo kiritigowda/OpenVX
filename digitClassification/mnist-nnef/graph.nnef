@@ -2,7 +2,7 @@ version 1.0;
 
 graph CNTKGraph( input ) -> ( output )
 {
-    input = external<scalar>(shape = [3, 1, 28, 28]);
+    input = external<scalar>(shape = [1, 1, 28, 28]);
     variable1 = variable<scalar>(shape = [8, 1, 5, 5], label = 'variable1');
     variable2 = variable<scalar>(shape = [1, 8, 1, 1], label = 'variable2');
     variable3 = variable<scalar>(shape = [16, 8, 5, 5], label = 'variable3');

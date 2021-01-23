@@ -32,7 +32,7 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - lcov
-  
+
 services:
   - docker
 
@@ -56,9 +56,9 @@ before_script:
   - cd ../../
 
 script:
-  - mkdir -p build && cd build
-  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
-  - make
+#  - mkdir -p build && cd build
+#  - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt ../digitClassification/
+#  - make
 
 after_success:
 #  - lcov --directory . --capture --output-file coverage.info

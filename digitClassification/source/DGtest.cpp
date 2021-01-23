@@ -94,7 +94,7 @@ DGtest::DGtest(const char *model_url)
     }
 
     // query number of parameters in imported kernel
-    vx_int32 num_params = 0; 
+    vx_int32 num_params = 0;
     ERROR_CHECK_STATUS(vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, &num_params, sizeof(vx_uint32)));
     vx_int32 direction, i;
     vx_int32 input_num = 0, output_num = 0;
@@ -105,13 +105,33 @@ DGtest::DGtest(const char *model_url)
         ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_DIRECTION, &direction, sizeof(enum vx_type_e)));
 
         if (direction == VX_INPUT)
+        {
             input_num++;
+            vx_tensor Tensor;
+            vx_size num_of_dims;
+            vx_size dims[4] = {1, 1, 1, 1};
+            STATUS_ERROR_CHECK(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
+            ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
+            printf("STATUS: InputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+            ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));
+        }
         else if (direction == VX_OUTPUT)
+        {
             output_num++;
+            vx_tensor Tensor;
+            vx_size num_of_dims;
+            vx_size dims[4] = {1, 1, 1, 1};
+            STATUS_ERROR_CHECK(vxQueryParameter(prm, VX_PARAMETER_ATTRIBUTE_REF, &Tensor, sizeof(vx_tensor)));
+            ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
+            ERROR_CHECK_STATUS(vxQueryTensor(Tensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
+            printf("STATUS: OutputTensor:%d Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+            ERROR_CHECK_STATUS(vxReleaseTensor(&Tensor));
+        }
 
         ERROR_CHECK_STATUS(vxReleaseParameter(&prm));
     }
-    printf("STATUS: vxImportKernelFromURL() Kernel -- Num Params:%d Num Inputs: %d Num Outputs: %d\n", num_params, input_num, output_num);
+    printf("STATUS: NN Import Kernel -- Num Params:%d Num Inputs:%d Num Outputs:%d\n", num_params, input_num, output_num);
 
     // create nn node for the graph
     mNode = vxCreateGenericNode(mGraph, mNN_kernel);
@@ -239,7 +259,7 @@ int DGtest::runInference(Mat &image)
     {
         outputTensorStride[j] = outputTensorStride[j - 1] * dims[j - 1];
     }
-    
+
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, outputViewStart, dims,
                                          outputTensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");

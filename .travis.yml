@@ -53,7 +53,6 @@ before_script:
   - cmake -DOPENVX_INCLUDES=$OPENVX_DIR/include -DOPENVX_LIBRARIES=$OPENVX_DIR/bin/libopenvx.so\;$OPENVX_DIR/bin/libvxu.so\;$OPENVX_DIR/bin/libnnef-lib.a\;pthread\;dl\;m\;rt -DOPENVX_CONFORMANCE_NNEF_IMPORT=ON ../cts/
   - cmake --build .
   - LD_LIBRARY_PATH=./lib ./bin/vx_test_conformance
-  - cd ../../
 
 script:
 #  - mkdir -p build && cd build

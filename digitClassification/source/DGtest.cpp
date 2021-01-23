@@ -93,18 +93,31 @@ DGtest::DGtest(const char *model_url)
         printf("STATUS: vxImportKernelFromURL() for %s model: %s successful\n", nnef_type, model_url);
     }
 
+    // query number of parameters in imported kernel
+    vx_int32 num_params = 0; 
+    ERROR_CHECK_STATUS(vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, &num_params, sizeof(vx_uint32)));
+    vx_int32 direction, i;
+    vx_int32 input_num = 0, output_num = 0;
+    for (i = 0; i < num_params; i++)
+    {
+        vx_parameter prm = vxGetKernelParameterByIndex(nn_kernel, i);
+
+        ERROR_CHECK_STATUS(vxQueryParameter(prm, VX_PARAMETER_DIRECTION, &direction, sizeof(enum vx_type_e)));
+
+        if (direction == VX_INPUT)
+            input_num++;
+        else if (direction == VX_OUTPUT)
+            output_num++;
+
+        ERROR_CHECK_STATUS(vxReleaseParameter(&prm));
+    }
+    printf("STATUS: vxImportKernelFromURL() Kernel -- Num Params:%d Num Inputs: %d Num Outputs: %d\n", num_params, input_num, output_num);
+
     // create nn node for the graph
     mNode = vxCreateGenericNode(mGraph, mNN_kernel);
     if (vxGetStatus((vx_reference)mNode))
     {
         printf("ERROR: vxCreateGenericNode() failed for mNode\n");
-        exit(-1);
-    }
-
-    status = vxQueryKernel(mNN_kernel, VX_KERNEL_PARAMETERS, &mNum_params, sizeof(vx_uint32));
-    if (status)
-    {
-        printf("ERROR: vxQueryKernel(...) failed (%d)\n", status);
         exit(-1);
     }
 

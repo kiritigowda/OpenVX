@@ -217,7 +217,7 @@ int DGtest::runInference(Mat &image)
         return -1;
     }
     vx_float32 localInputTensor[(1*1*28*28)] = {0};
-    vx_char **input_data_ptr = localInputTensor;
+    vx_char **input_data_ptr = &localInputTensor;
 
     vx_size inputViewStart[4] = {0};
     vx_size inputTensorStride[4] = {0};
@@ -268,7 +268,7 @@ int DGtest::runInference(Mat &image)
         return -1;
     }
     vx_float32 localOutputTensor[10] = {0};
-    vx_char **output_data_ptr = localOutputTensor;
+    vx_char **output_data_ptr = &localOutputTensor;
 
     // calculate output tensor stride
     vx_size outputViewStart[4] = {0};

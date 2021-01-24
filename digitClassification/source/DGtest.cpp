@@ -211,32 +211,34 @@ int DGtest::runInference(Mat &image)
 
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
-    float *localInputTensor = new float[inputTensorSize];
-    memset(localInputTensor, 0, (sizeof(vx_float32) * inputTensorSize));
+    if (inputTensorSize != (1*1*28*28)) // n*c*h*w - MNIST input size
+    {
+        printf("ERROR: Input Mismatch - MNIST NNEF Model Expected, check model details\n");
+        return -1;
+    }
+    vx_float32 localInputTensor[(1*1*28*28)] = {0};
+    vx_char **input_data_ptr = localInputTensor;
 
     vx_size inputViewStart[4] = {0};
     vx_size inputTensorStride[4] = {0};
-    
+
     inputTensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
         inputTensorStride[j] = inputTensorStride[j - 1] * dims[j - 1];
     }
 
-    for (vx_size y = 0; y < dims[2]; y++)
+    for (vx_size y = 0; y < (1*1*28*28); y++)
     {
-        unsigned char *src = img.data + y * dims[3] * dims[1];
-        float *dst = localInputTensor + ((y * inputTensorStride[2]) >> 2);
-        for (vx_size x = 0; x < dims[3]; x++, src++)
-        {
-            *dst++ = src[0];
-        }
+        unsigned char *src = img.data + y;
+        float *dst = localInputTensor + y;
+        *dst = src[0];
     }
 
     printf("STATUS: Image to Tensor Conversion Successful\n");
 
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, inputViewStart, dims,
-                                         inputTensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+                                         inputTensorStride, input_data_ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Input Tensor\n");
 
     //process the graph
@@ -260,9 +262,15 @@ int DGtest::runInference(Mat &image)
 
     // copy output tensor
     vx_size outputTensorSize = (out_dims[0] * out_dims[1] * out_dims[2] * out_dims[3]);
-    float *localOutputTensor = new float[outputTensorSize];
-    memset(localOutputTensor, 0, (sizeof(vx_float32) * outputTensorSize));
+    if (outputTensorSize != (1*10*1*1)) // n*c*h*w - MNIST output size
+    {
+        printf("ERROR: Output Mismatch - MNIST NNEF Model Expected, check model details\n");
+        return -1;
+    }
+    vx_float32 localOutputTensor[10] = {0};
+    vx_char **output_data_ptr = localOutputTensor;
 
+    // calculate output tensor stride
     vx_size outputViewStart[4] = {0};
     vx_size outputTensorStride[4] = {0};
     outputTensorStride[0] = sizeof(vx_float32);
@@ -270,9 +278,8 @@ int DGtest::runInference(Mat &image)
     {
         outputTensorStride[j] = outputTensorStride[j - 1] * out_dims[j - 1];
     }
-
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, outputViewStart, out_dims,
-                                         outputTensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+                                         outputTensorStride, output_data_ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
     for (int i = 0; i < outputTensorSize; i++)
@@ -282,9 +289,6 @@ int DGtest::runInference(Mat &image)
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, (localOutputTensor + 10)));
     printf("STATUS: Output Tensor Analysis Passed %d\n", mDigit);
-
-    delete localInputTensor;
-    delete localOutputTensor;
 
     return 0;
 }

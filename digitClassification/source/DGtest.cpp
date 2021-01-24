@@ -38,7 +38,6 @@ static void VX_CALLBACK log_callback(vx_context context, vx_reference ref, vx_st
 
 DGtest::DGtest(const char *model_url)
 {
-
     // create context
     mContext = vxCreateContext();
     vx_status status;
@@ -48,18 +47,13 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxCreateContext() failed\n");
         exit(-1);
     }
+    else
+    {
+        printf("STATUS: vxCreateContext() successful\n");
+    }
 
     // register log
     vxRegisterLogCallback(mContext, log_callback, vx_false_e);
-
-    // create graph
-    mGraph = vxCreateGraph(mContext);
-    status = vxGetStatus((vx_reference)mGraph);
-    if (status)
-    {
-        printf("ERROR: vxCreateGraph(...) failed (%d)\n", status);
-        exit(-1);
-    }
 
     //Get nnef kernel
     char nn_type[5] = "nnef";
@@ -101,13 +95,17 @@ DGtest::DGtest(const char *model_url)
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(vx_size)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
-                printf("STATUS: InputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", input_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+                printf("STATUS: vxImportKernelFromURL -- InputTensor:%d [TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions:[%zu, %zu, %zu, %zu]])\n", input_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
                 // create input tensor
                 mInputTensor = vxCreateTensor(mContext, num_of_dims, dims, tensor_type, 0);
                 if (vxGetStatus((vx_reference)mInputTensor))
                 {
                     printf("ERROR: vxCreateTensor() failed\n");
                     exit(-1);
+                }
+                else
+                {
+                    printf("STATUS: vxCreateTensor() Input Tensor successful\n");
                 }
             }
         }
@@ -126,7 +124,7 @@ DGtest::DGtest(const char *model_url)
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(vx_size)));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
                 ERROR_CHECK_STATUS(vxQueryMetaFormatAttribute(meta, VX_TENSOR_DATA_TYPE, &tensor_type, sizeof(vx_int32)));
-                printf("STATUS: OutputTensor:%d TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions - [%zu, %zu, %zu, %zu])\n", output_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+                printf("STATUS: vxImportKernelFromURL -- OutputTensor:%d [TENSOR_DATA_TYPE:%d Num Dimensions:%zu  Dimensions:[%zu, %zu, %zu, %zu]])\n", output_num, tensor_type, num_of_dims, dims[0], dims[1], dims[2], dims[3]);
                 // create output tensor
                 mOutputTensor = vxCreateTensor(mContext, num_of_dims, dims, tensor_type, 0);
                 if (vxGetStatus((vx_reference)mOutputTensor))
@@ -134,12 +132,29 @@ DGtest::DGtest(const char *model_url)
                     printf("ERROR: vxCreateTensor() failed for mOutputTensor\n");
                     exit(-1);
                 }
+                else
+                {
+                    printf("STATUS: vxCreateTensor() Output Tensor successful\n");
+                }
             }
         }
 
         ERROR_CHECK_STATUS(vxReleaseParameter(&prm));
     }
-    printf("STATUS: NN Import Kernel -- Num Params:%d Num Inputs:%d Num Outputs:%d\n", num_params, input_num, output_num);
+    printf("STATUS: vxImportKernelFromURL -- Num Params:%d Num Inputs:%d Num Outputs:%d\n", num_params, input_num, output_num);
+
+    // create graph
+    mGraph = vxCreateGraph(mContext);
+    status = vxGetStatus((vx_reference)mGraph);
+    if (status)
+    {
+        printf("ERROR: vxCreateGraph(...) failed (%d)\n", status);
+        exit(-1);
+    }
+    else
+    {
+        printf("STATUS: vxCreateGraph successful \n");
+    }
 
     // create nn node for the graph
     mNode = vxCreateGenericNode(mGraph, mNN_kernel);
@@ -148,10 +163,32 @@ DGtest::DGtest(const char *model_url)
         printf("ERROR: vxCreateGenericNode() failed for mNode\n");
         exit(-1);
     }
+    else
+    {
+        printf("STATUS: vxCreateGenericNode for Imported Kernel successful \n");
+    }
 
     //add input and output tensors to the node
-    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 0, (vx_reference)mInputTensor));
-    ERROR_CHECK_STATUS(vxSetParameterByIndex(mNode, 1, (vx_reference)mOutputTensor));
+    status = vxSetParameterByIndex(mNode, 0, (vx_reference)mInputTensor);
+    if (status)
+    {
+        printf("ERROR: Input Tensor vxSetParameterByIndex(...) failed (%d)\n", status);
+        exit(-1);
+    }
+    else
+    {
+        printf("STATUS: Input Tensor vxSetParameterByIndex for Node successful \n");
+    }
+    status = vxSetParameterByIndex(mNode, 1, (vx_reference)mOutputTensor);
+    if (status)
+    {
+        printf("ERROR: Output Tensor vxSetParameterByIndex(...) failed (%d)\n", status);
+        exit(-1);
+    }
+    else
+    {
+        printf("STATUS: Output Tensor vxSetParameterByIndex for Node successful \n");
+    }
 
     //verify the graph
     status = vxVerifyGraph(mGraph);
@@ -207,36 +244,38 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
     // query input tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mInputTensor, VX_TENSOR_DIMS, &dims, sizeof(dims[0]) * num_of_dims));
-    printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
+    //printf("STATUS: InputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, dims[0], dims[1], dims[2], dims[3]);
 
     // convert image to tensor
     vx_size inputTensorSize = (dims[0] * dims[1] * dims[2] * dims[3]);
-    float *localInputTensor = new float[inputTensorSize];
-    memset(localInputTensor, 0, (sizeof(vx_float32) * inputTensorSize));
+    if (inputTensorSize != (1 * 1 * 28 * 28)) // n*c*h*w - MNIST input size
+    {
+        printf("ERROR: Input Mismatch - MNIST NNEF Model Expected, check model details\n");
+        return -1;
+    }
+    vx_float32 localInputTensor[(1 * 1 * 28 * 28)] = {0};
+    vx_char *input_data_ptr = (char *)localInputTensor;
 
     vx_size inputViewStart[4] = {0};
     vx_size inputTensorStride[4] = {0};
-    
+
     inputTensorStride[0] = sizeof(vx_float32);
     for (int j = 1; j < num_of_dims; j++)
     {
         inputTensorStride[j] = inputTensorStride[j - 1] * dims[j - 1];
     }
 
-    for (vx_size y = 0; y < dims[2]; y++)
+    for (vx_size y = 0; y < (1 * 1 * 28 * 28); y++)
     {
-        unsigned char *src = img.data + y * dims[3] * dims[1];
-        float *dst = localInputTensor + ((y * inputTensorStride[2]) >> 2);
-        for (vx_size x = 0; x < dims[3]; x++, src++)
-        {
-            *dst++ = src[0];
-        }
+        unsigned char *src = img.data + y;
+        float *dst = localInputTensor + y;
+        *dst = src[0];
     }
 
     printf("STATUS: Image to Tensor Conversion Successful\n");
 
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mInputTensor, num_of_dims, inputViewStart, dims,
-                                         inputTensorStride, (void **)&localInputTensor, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
+                                         inputTensorStride, input_data_ptr, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Input Tensor\n");
 
     //process the graph
@@ -256,13 +295,19 @@ int DGtest::runInference(Mat &image)
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_NUMBER_OF_DIMS, &num_of_dims, sizeof(num_of_dims)));
     // query input tensor for the dimension
     ERROR_CHECK_STATUS(vxQueryTensor(mOutputTensor, VX_TENSOR_DIMS, &out_dims, sizeof(out_dims[0]) * num_of_dims));
-    printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, out_dims[0], out_dims[1], out_dims[2], out_dims[3]);
+    //printf("STATUS: OutputTensor: Num Dimensions: %zu  Dimensions - [%zu, %zu, %zu, %zu])\n", num_of_dims, out_dims[0], out_dims[1], out_dims[2], out_dims[3]);
 
     // copy output tensor
     vx_size outputTensorSize = (out_dims[0] * out_dims[1] * out_dims[2] * out_dims[3]);
-    float *localOutputTensor = new float[outputTensorSize];
-    memset(localOutputTensor, 0, (sizeof(vx_float32) * outputTensorSize));
+    if (outputTensorSize != (1 * 10 * 1 * 1)) // n*c*h*w - MNIST output size
+    {
+        printf("ERROR: Output Mismatch - MNIST NNEF Model Expected, check model details\n");
+        return -1;
+    }
+    vx_float32 localOutputTensor[10] = {0};
+    vx_char *output_data_ptr = (char *)localOutputTensor;
 
+    // calculate output tensor stride
     vx_size outputViewStart[4] = {0};
     vx_size outputTensorStride[4] = {0};
     outputTensorStride[0] = sizeof(vx_float32);
@@ -270,21 +315,19 @@ int DGtest::runInference(Mat &image)
     {
         outputTensorStride[j] = outputTensorStride[j - 1] * out_dims[j - 1];
     }
-
     ERROR_CHECK_STATUS(vxCopyTensorPatch(mOutputTensor, num_of_dims, outputViewStart, out_dims,
-                                         outputTensorStride, (void **)&localOutputTensor, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
+                                         outputTensorStride, output_data_ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST));
     printf("STATUS: vxCopyTensorPatch Passed for Output Tensor\n");
 
+    /*
     for (int i = 0; i < outputTensorSize; i++)
     {
         printf("STATUS: Output[%d] - %f\n", i, localOutputTensor[i]);
     }
+    */
 
     mDigit = std::distance(localOutputTensor, std::max_element(localOutputTensor, (localOutputTensor + 10)));
-    printf("STATUS: Output Tensor Analysis Passed %d\n", mDigit);
-
-    delete localInputTensor;
-    delete localOutputTensor;
+    printf("STATUS: Analysis Passed - MNIST Result:%d\n", mDigit);
 
     return 0;
 }

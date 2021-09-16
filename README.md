@@ -1,6 +1,6 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center"><img width="50%" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/OpenVX_logo.svg/1920px-OpenVX_logo.svg.png" /></p>
+<p align="center"><img width="30%" src="https://raw.githubusercontent.com/GPUOpen-ProfessionalCompute-Libraries/MIVisionX/master/docs/images/OpenVX_logo.png" /></p>
 
 <a href="https://www.khronos.org/openvx/" target="_blank">Khronos OpenVX™</a> is an open, royalty-free standard for cross-platform acceleration of computer vision applications. OpenVX enables performance and power-optimized computer vision processing, especially important in embedded and real-time use cases such as face, body, and gesture tracking, smart video surveillance, advanced driver assistance systems (ADAS), object and scene reconstruction, augmented reality, visual inspection, robotics and more.
 
@@ -10,7 +10,7 @@
 
 ## OpenVX Implementation for Raspberry Pi
 
-<p align="center"> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="10%" src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png" /> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="8%" src="https://svgsilh.com/svg/156116.svg"/> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="40%" src="https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/OpenVX_logo.svg/1920px-OpenVX_logo.svg.png"/> </p>
+<p align="center"> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="10%" src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png" /> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="8%" src="https://svgsilh.com/svg/156116.svg"/> &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; <img width="40%" src="https://raw.githubusercontent.com/GPUOpen-ProfessionalCompute-Libraries/MIVisionX/master/docs/images/OpenVX_logo.png"/> </p>
 
 ### Identify Raspberry Pi
 
